@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - <%= SITE_NAME %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <header class="bg-white shadow-sm border-b px-4 py-3">
+        <a href="/cart" class="flex items-center gap-2 max-w-4xl mx-auto">
+            <i class="fas fa-arrow-left"></i>
+            <span class="font-bold">Checkout</span>
+        </a>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Delivery Details -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border h-fit">
+                <h2 class="text-xl font-bold mb-6">Delivery Details</h2>
+                <form action="/place-order" method="POST">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Full Name</label>
+                            <input type="text" value="<%= user.full_name %>" class="w-full px-4 py-3 rounded-lg border bg-gray-50" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email</label>
+                            <input type="email" value="<%= user.email %>" class="w-full px-4 py-3 rounded-lg border bg-gray-50" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Shipping Address</label>
+                            <textarea name="shipping_address" required class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-[#F4C85B] outline-none" rows="3" placeholder="Enter your full delivery address..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Phone Number (for Delivery)</label>
+                            <input type="tel" name="phone_number" required class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-[#F4C85B] outline-none" placeholder="e.g. 07032187121">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full mt-8 bg-gray-900 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-gray-800 transition-all">
+                        Complete Order
+                    </button>
+                </form>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="bg-[#FDF9F0] rounded-2xl p-6 border h-fit">
+                <h2 class="text-xl font-bold mb-6">Order Summary</h2>
+                <p class="text-gray-600 text-sm mb-6">Your order will be processed and we'll contact you for payment confirmation (Bank Transfer or Cash on Delivery).</p>
+                
+                <div class="space-y-3 border-t pt-4 border-amber-200">
+                    <div class="flex justify-between font-bold text-lg">
+                        <span>Grand Total</span>
+                        <span class="text-amber-600">Please see Cart for total</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -222,4 +222,68 @@ router.post('/bulk-csv-upload', isAdmin, upload.single('csvFile'), async (req, r
         });
 });
 
+// User Management
+router.get('/users', isAdmin, async (req, res) => {
+    try {
+        const [users] = await pool.execute("SELECT id, full_name, email, phone, created_at FROM users ORDER BY created_at DESC");
+        res.render('admin/users', { users, message: req.query.message || null });
+    } catch (error) {
+        console.error('Users list error:', error);
+        res.status(500).send('Server error');
+    }
+});
+
+router.post('/create-user', isAdmin, async (req, res) => {
+    const { full_name, email, password, phone } = req.body;
+    try {
+        const hash = await bcrypt.hash(password, 10);
+        await pool.execute(
+            "INSERT INTO users (full_name, email, password_hash, phone) VALUES (?, ?, ?, ?)",
+            [full_name, email, hash, phone || '']
+        );
+        res.redirect('/admin/users?message=' + encodeURIComponent('✅ User created successfully!'));
+    } catch (error) {
+        console.error('Create user error:', error);
+        res.redirect('/admin/users?message=' + encodeURIComponent('❌ Error: ' + error.message));
+    }
+});
+
+router.post('/delete-user', isAdmin, async (req, res) => {
+    const { user_id } = req.body;
+    try {
+        await pool.execute("DELETE FROM users WHERE id = ?", [user_id]);
+        res.redirect('/admin/users?message=' + encodeURIComponent('✅ User deleted successfully!'));
+    } catch (error) {
+        console.error('Delete user error:', error);
+        res.redirect('/admin/users?message=' + encodeURIComponent('❌ Error: ' + error.message));
+    }
+});
+
+// Order Management
+router.get('/orders', isAdmin, async (req, res) => {
+    try {
+        const [orders] = await pool.execute(`
+            SELECT o.*, u.full_name, u.email 
+            FROM orders o 
+            JOIN users u ON o.user_id = u.id 
+            ORDER BY o.created_at DESC
+        `);
+        res.render('admin/orders', { orders, message: req.query.message || null });
+    } catch (error) {
+        console.error('Orders list error:', error);
+        res.status(500).send('Server error');
+    }
+});
+
+router.post('/update-order-status', isAdmin, async (req, res) => {
+    const { order_id, status } = req.body;
+    try {
+        await pool.execute("UPDATE orders SET status = ? WHERE id = ?", [status, order_id]);
+        res.redirect('/admin/orders?message=' + encodeURIComponent('✅ Order status updated!'));
+    } catch (error) {
+        console.error('Update order error:', error);
+        res.redirect('/admin/orders?message=' + encodeURIComponent('❌ Error: ' + error.message));
+    }
+});
+
 module.exports = router;

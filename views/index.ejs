@@ -216,7 +216,9 @@
 
       <nav class="hidden md:flex gap-6 text-sm font-medium">
         <a href="#hero" class="text-gray-800 hover:text-[#F4C85B] transition-colors duration-200">Home</a>
-        <a href="/buy" class="text-gray-800 hover:text-[#F4C85B] transition-colors duration-200">All Products</a>
+        <% if (user) { %>
+          <a href="/buy" class="text-gray-800 hover:text-[#F4C85B] transition-colors duration-200">All Products</a>
+        <% } %>
         <a href="#about" class="text-gray-800 hover:text-[#F4C85B] transition-colors duration-200">About</a>
         <a href="#contact" class="text-gray-800 hover:text-[#F4C85B] transition-colors duration-200">Contact</a>
       </nav>
@@ -230,8 +232,8 @@
             <span class="text-sm font-medium text-gray-700">My Account</span>
           </a>
         <% } else { %>
-          <a href="/login" class="hidden md:flex items-center px-3 py-2 text-sm font-bold text-gray-700 hover:text-[#F4C85B] transition-colors">Login</a>
-          <a href="/register" class="hidden md:flex items-center px-4 py-2 text-sm font-bold bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all">Register</a>
+          <a href="/login" class="px-3 py-2 text-sm font-bold text-gray-700 hover:text-[#F4C85B] transition-colors">Login</a>
+          <a href="/register" class="px-4 py-2 text-sm font-bold bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all">Register</a>
         <% } %>
 
         <button onclick="openWhatsAppModal('<%= WHATSAPP_CHAT_URL %>', 'chat')" 
@@ -252,8 +254,6 @@
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="md:hidden hidden bg-white px-4 pb-4 shadow-lg border-t">
       <div class="flex flex-col space-y-3">
-        <a href="#hero" class="text-gray-800 hover:text-[#F4C85B] transition-colors py-3 border-b border-gray-100 text-sm">Home</a>
-        <a href="/buy" class="text-gray-800 hover:text-[#F4C85B] transition-colors py-3 border-b border-gray-100 text-sm">All Products</a>
         <a href="#about" class="text-gray-800 hover:text-[#F4C85B] transition-colors py-3 border-b border-gray-100 text-sm">About</a>
         <a href="#contact" class="text-gray-800 hover:text-[#F4C85B] transition-colors py-3 border-b border-gray-100 text-sm">Contact</a>
         
@@ -286,10 +286,12 @@
       </p>
 
       <div class="flex flex-col sm:flex-row gap-2 justify-center max-w-md mx-auto">
+        <% if (user) { %>
         <a href="/buy" class="px-5 py-3 bg-[#F4C85B] hover:bg-amber-500 text-black rounded-lg font-semibold transition-colors flex items-center justify-center btn-touch text-sm">
           <i class="fas fa-tshirt mr-2"></i>
           View All Products
         </a>
+        <% } %>
         <button onclick="openWhatsAppModal('<%= WHATSAPP_CHAT_URL %>', 'chat')" class="px-5 py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-lg font-semibold transition-colors flex items-center justify-center btn-touch text-sm">
           <i class="fab fa-whatsapp mr-2"></i>
           Chat with Us
@@ -297,6 +299,7 @@
       </div>
     </div>
   </section>
+
 
   <!-- Featured Products -->
   <section id="products" class="py-12 md:py-16 bg-white">
@@ -306,7 +309,7 @@
         <p class="text-gray-600 max-w-2xl mx-auto text-xs md:text-sm">Handpicked selection of our most exquisite fashion pieces</p>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <% if (featuredProducts && featuredProducts.length > 0) { %>
           <% featuredProducts.forEach(product => { %>
           <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden hover-lift border">
@@ -328,17 +331,24 @@
             <div class="p-3">
               <h3 class="font-semibold text-gray-900 mb-1 text-sm leading-tight"><%= product.name %></h3>
               <p class="text-gray-600 text-xs mb-3 line-clamp-2"><%= product.description %></p>
-              <div class="flex gap-1">
+              <div class="flex flex-col gap-2">
+                <div class="flex gap-1">
+                    <button data-id="<%= product.id %>" 
+                            class="btn-view-product flex-1 px-2 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg font-medium transition-colors flex items-center justify-center btn-touch text-xs">
+                    <i class="fas fa-eye mr-1"></i>
+                    View
+                    </button>
+                    <button data-url="<%= WHATSAPP_CHAT_URL %>?text=Hi! I'm interested in <%= encodeURIComponent(product.name) %> (₦<%= product.price.toLocaleString() %>)" 
+                            data-type="product"
+                            class="btn-buy-product flex-1 px-2 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-lg font-medium transition-colors flex items-center justify-center btn-touch text-xs">
+                    <i class="fab fa-whatsapp mr-1"></i>
+                    Chat
+                    </button>
+                </div>
                 <button data-id="<%= product.id %>" 
-                        class="btn-view-product flex-1 px-2 py-2 bg-[#F4C85B] hover:bg-amber-500 text-black rounded-lg font-medium transition-colors flex items-center justify-center btn-touch text-xs">
-                  <i class="fas fa-eye mr-1"></i>
-                  View
-                </button>
-                <button data-url="<%= WHATSAPP_CHAT_URL %>?text=Hi! I'm interested in <%= encodeURIComponent(product.name) %> (₦<%= product.price.toLocaleString() %>)" 
-                        data-type="product"
-                        class="btn-buy-product flex-1 px-2 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-lg font-medium transition-colors flex items-center justify-center btn-touch text-xs">
-                  <i class="fab fa-whatsapp mr-1"></i>
-                  Buy
+                        class="btn-add-to-cart w-full px-2 py-2 bg-[#F4C85B] hover:bg-amber-500 text-black rounded-lg font-bold transition-colors flex items-center justify-center btn-touch text-xs">
+                  <i class="fas fa-shopping-cart mr-2"></i>
+                  Add to Cart
                 </button>
               </div>
             </div>
@@ -350,14 +360,6 @@
             <p class="text-gray-500 text-sm">No featured products available.</p>
           </div>
         <% } %>
-      </div>
-
-      <!-- View All Products Button -->
-      <div class="text-center mt-8">
-        <a href="/buy" class="inline-flex items-center px-6 py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-lg font-semibold transition-colors btn-touch text-sm">
-          <i class="fas fa-tshirt mr-2"></i>
-          View All Products
-        </a>
       </div>
     </div>
   </section>
@@ -578,6 +580,28 @@
       document.body.classList.remove('using-keyboard');
     });
 
+    // Add to cart
+    async function addToCart(productId) {
+      if (!IS_LOGGED_IN) {
+        window.location.href = '/login';
+        return;
+      }
+      try {
+        const response = await fetch('/api/cart/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ product_id: productId })
+        });
+        const result = await response.json();
+        if (result.success) {
+          alert('Item added to cart!');
+          // Optional: update a cart counter in the UI
+        }
+      } catch (error) {
+        console.error('Cart error:', error);
+      }
+    }
+
     async function toggleFavorite(productId, btn) {
       if (!IS_LOGGED_IN) {
         window.location.href = '/login?message=' + encodeURIComponent('Login to save favorites!');
@@ -624,6 +648,11 @@
       const buyBtn = e.target.closest('.btn-buy-product');
       if (buyBtn) {
         openWhatsAppModal(buyBtn.dataset.url, buyBtn.dataset.type);
+      }
+
+      const addToCartBtn = e.target.closest('.btn-add-to-cart');
+      if (addToCartBtn) {
+        addToCart(addToCartBtn.dataset.id);
       }
     });
   </script>

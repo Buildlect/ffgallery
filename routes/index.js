@@ -6,7 +6,7 @@ const { pool } = require('../config/db');
 router.get('/', async (req, res) => {
     try {
         const [featuredProducts] = await pool.execute(
-            "SELECT * FROM products WHERE is_featured = TRUE AND status = 'active' ORDER BY created_at DESC LIMIT 8"
+            "SELECT * FROM products WHERE is_featured = TRUE AND status = 'active' ORDER BY created_at DESC LIMIT 6"
         );
         
         const [categoriesRows] = await pool.execute(
@@ -21,8 +21,10 @@ router.get('/', async (req, res) => {
     }
 });
 
+const { isUser } = require('../middleware/auth');
+
 // All Products Page
-router.get('/buy', async (req, res) => {
+router.get('/buy', isUser, async (req, res) => {
     try {
         const search = req.query.search || '';
         const categoryFilter = req.query.category || '';

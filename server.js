@@ -38,6 +38,7 @@ app.use((req, res, next) => {
     res.locals.WHATSAPP_CHAT_URL = `https://wa.me/${process.env.WHATSAPP_NUMBER}`;
     res.locals.admin = req.session.admin || null;
     res.locals.user = req.session.user || null;
+    res.locals.cart = req.session.cart || [];
     next();
 });
 

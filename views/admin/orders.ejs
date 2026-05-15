@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Orders - <%= SITE_NAME %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <main class="flex-1 p-6 md:p-8">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <a href="/admin" class="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 mb-1">
+                            <i class="fas fa-arrow-left text-xs"></i> Back to Dashboard
+                        </a>
+                        <h1 class="text-2xl font-bold text-gray-900">Manage Orders</h1>
+                    </div>
+                </div>
+
+                <% if (message) { %>
+                    <div class="bg-white border-l-4 border-amber-500 p-4 mb-6 shadow-sm rounded-r-lg">
+                        <p class="text-sm text-gray-700"><%= message %></p>
+                    </div>
+                <% } %>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 border-b">
+                            <tr>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Order ID</th>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Customer</th>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Total</th>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <% if (orders.length === 0) { %>
+                                <tr>
+                                    <td colspan="5" class="px-6 py-10 text-center text-gray-400">No orders yet.</td>
+                                </tr>
+                            <% } %>
+                            <% orders.forEach(order => { %>
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 font-bold text-gray-900">#<%= order.id %></td>
+                                    <td class="px-6 py-4">
+                                        <div class="font-medium text-gray-900"><%= order.full_name %></div>
+                                        <div class="text-xs text-gray-500"><%= order.email %></div>
+                                    </td>
+                                    <td class="px-6 py-4 font-bold text-gray-900">₦<%= order.total_amount.toLocaleString() %></td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider 
+                                            <%= order.status === 'pending' ? 'bg-amber-100 text-amber-700' : 
+                                               order.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700' %>">
+                                            <%= order.status %>
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <form action="/admin/update-order-status" method="POST" class="inline-flex gap-2">
+                                            <input type="hidden" name="order_id" value="<%= order.id %>">
+                                            <select name="status" onchange="this.form.submit()" class="text-xs border border-gray-200 rounded p-1 outline-none">
+                                                <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                                                <option value="paid" <%= order.status === 'paid' ? 'selected' : '' %>>Paid</option>
+                                                <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                                                <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                                                <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                            </select>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

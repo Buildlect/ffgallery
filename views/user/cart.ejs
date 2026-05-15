@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cart - <%= SITE_NAME %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+        body { font-family: 'Outfit', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen pb-20">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="/" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="text-lg font-bold text-gray-900">Shopping Cart</h1>
+            </div>
+            <div class="text-sm font-medium text-gray-600">
+                <%= cart.length %> Items
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        <% if (cart.length === 0) { %>
+            <div class="text-center py-20">
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
+                    <i class="fas fa-shopping-bag text-3xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
+                <p class="text-gray-500 mb-8">Looks like you haven't added anything to your cart yet.</p>
+                <a href="/buy" class="bg-amber-500 text-black font-bold py-3 px-8 rounded-xl hover:bg-amber-600 transition-all">
+                    Start Shopping
+                </a>
+            </div>
+        <% } else { %>
+            <div class="flex flex-col gap-6">
+                <!-- Cart Items -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <% cart.forEach(item => { %>
+                        <div class="p-4 border-b last:border-0 flex gap-4 items-center">
+                            <img src="/<%= item.image %>" class="w-20 h-20 object-cover rounded-lg">
+                            <div class="flex-1">
+                                <h3 class="font-bold text-gray-900"><%= item.name %></h3>
+                                <p class="text-amber-600 font-bold">₦<%= item.price.toLocaleString() %></p>
+                            </div>
+                            <div class="flex items-center bg-gray-50 rounded-lg p-1">
+                                <button onclick="updateQty('<%= item.id %>', <%= item.quantity - 1 %>)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded">-</button>
+                                <span class="w-8 text-center font-bold"><%= item.quantity %></span>
+                                <button onclick="updateQty('<%= item.id %>', <%= item.quantity + 1 %>)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded">+</button>
+                            </div>
+                            <button onclick="updateQty('<%= item.id %>', 0)" class="text-red-400 hover:text-red-600 p-2">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    <% }); %>
+                </div>
+
+                <!-- Summary & Checkout -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="text-gray-500 font-medium">Order Total</span>
+                        <span class="text-2xl font-bold text-gray-900">₦<%= total.toLocaleString() %></span>
+                    </div>
+
+                    <form action="/checkout" method="POST" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Delivery Address</label>
+                            <textarea name="address" required class="w-full bg-gray-50 border border-gray-100 rounded-xl p-4 focus:ring-2 focus:ring-amber-500 outline-none" placeholder="Enter your full address..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Payment Method</label>
+                            <select name="payment_method" class="w-full bg-gray-50 border border-gray-100 rounded-xl p-4 focus:ring-2 focus:ring-amber-500 outline-none">
+                                <option value="WhatsApp/Transfer">Bank Transfer / WhatsApp Confirmation</option>
+                                <option value="Cash on Delivery">Cash on Delivery (Lagos Only)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-black transition-all shadow-lg shadow-gray-200">
+                            Place Order
+                        </button>
+                    </form>
+                </div>
+            </div>
+        <% } %>
+    </main>
+
+    <script>
+        async function updateQty(productId, newQty) {
+            try {
+                const response = await fetch('/api/cart/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId, quantity: newQty })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Update failed:', error);
+            }
+        }
+    </script>
+</body>
+</html>

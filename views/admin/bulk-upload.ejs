@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Bulk Upload - <%= SITE_NAME %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .drop-zone {
+            border: 2px dashed #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        .drop-zone.active {
+            border-color: #F4C85B;
+            background-color: #fffbeb;
+        }
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .preview-card {
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="/admin" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="text-xl font-bold text-gray-900">Advanced Bulk Upload</h1>
+            </div>
+            <div id="save-status" class="hidden text-sm font-medium"></div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Initial Upload Area -->
+        <div id="upload-area" class="bg-white rounded-2xl shadow-sm p-8 text-center drop-zone" id="drop-zone">
+            <div class="max-w-md mx-auto">
+                <div class="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#F4C85B]">
+                    <i class="fas fa-cloud-upload-alt text-2xl"></i>
+                </div>
+                <h2 class="text-lg font-bold text-gray-900 mb-2">Upload Multiple Images</h2>
+                <p class="text-gray-500 text-sm mb-6">Drag and drop your product images here, or click to browse. You can edit names and prices before saving.</p>
+                
+                <label class="bg-[#F4C85B] hover:bg-amber-500 text-black font-semibold py-3 px-8 rounded-xl cursor-pointer transition-colors inline-block">
+                    Select Images
+                    <input type="file" id="file-input" multiple accept="image/*" class="hidden">
+                </label>
+            </div>
+        </div>
+
+        <!-- Preview Area -->
+        <div id="preview-area" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-gray-900">Ready to Upload (<span id="count-badge">0</span>)</h3>
+                <div class="flex gap-3">
+                    <button id="clear-all" class="text-gray-500 hover:text-red-600 text-sm font-medium">
+                        Clear All
+                    </button>
+                    <button id="upload-all" class="bg-[#F4C85B] hover:bg-amber-500 text-black font-bold py-2 px-6 rounded-lg transition-all shadow-sm flex items-center">
+                        <i class="fas fa-save mr-2"></i> Save All Products
+                    </button>
+                </div>
+            </div>
+
+            <div id="preview-grid" class="preview-grid">
+                <!-- Preview cards will be injected here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Template for Preview Card -->
+    <template id="card-template">
+        <div class="preview-card bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 flex flex-col">
+            <div class="relative h-48 overflow-hidden bg-gray-100">
+                <img src="" class="w-full h-full object-cover">
+                <button class="remove-btn absolute top-2 right-2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+            <div class="p-4 space-y-4 flex-1">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Product Name</label>
+                    <input type="text" class="name-input w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#F4C85B] focus:border-transparent outline-none transition-all">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Price (₦)</label>
+                        <input type="number" class="price-input w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#F4C85B] focus:border-transparent outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Category</label>
+                        <select class="category-input w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#F4C85B] focus:border-transparent outline-none transition-all">
+                            <option value="Dresses">Dresses</option>
+                            <option value="Gowns">Gowns</option>
+                            <option value="Kaftans">Kaftans</option>
+                            <option value="Corporate">Corporate</option>
+                            <option value="Traditional">Traditional</option>
+                            <option value="Uncategorized">Uncategorized</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        const uploadArea = document.getElementById('upload-area');
+        const previewArea = document.getElementById('preview-area');
+        const previewGrid = document.getElementById('preview-grid');
+        const fileInput = document.getElementById('file-input');
+        const cardTemplate = document.getElementById('card-template');
+        const countBadge = document.getElementById('count-badge');
+        const saveStatus = document.getElementById('save-status');
+
+        let pendingFiles = [];
+
+        // Handle File Selection
+        fileInput.addEventListener('change', handleFiles);
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('active'); });
+        uploadArea.addEventListener('dragleave', () => { uploadArea.classList.remove('active'); });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('active');
+            handleFiles({ target: { files: e.dataTransfer.files } });
+        });
+
+        function handleFiles(e) {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+
+            uploadArea.classList.add('hidden');
+            previewArea.classList.remove('hidden');
+
+            files.forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+                
+                const fileId = Math.random().toString(36).substr(2, 9);
+                pendingFiles.push({ id: fileId, file });
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const card = cardTemplate.content.cloneNode(true);
+                    const cardDiv = card.querySelector('.preview-card');
+                    cardDiv.dataset.id = fileId;
+                    
+                    card.querySelector('img').src = event.target.result;
+                    card.querySelector('.name-input').value = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
+                    card.querySelector('.price-input').value = 0;
+                    
+                    card.querySelector('.remove-btn').addEventListener('click', () => {
+                        cardDiv.remove();
+                        pendingFiles = pendingFiles.filter(f => f.id !== fileId);
+                        updateCount();
+                    });
+
+                    previewGrid.appendChild(card);
+                    updateCount();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function updateCount() {
+            countBadge.textContent = pendingFiles.length;
+            if (pendingFiles.length === 0) {
+                uploadArea.classList.remove('hidden');
+                previewArea.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('clear-all').addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all selected images?')) {
+                previewGrid.innerHTML = '';
+                pendingFiles = [];
+                updateCount();
+            }
+        });
+
+        document.getElementById('upload-all').addEventListener('click', async () => {
+            if (pendingFiles.length === 0) return;
+
+            const btn = document.getElementById('upload-all');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading...';
+            
+            saveStatus.classList.remove('hidden', 'text-green-600', 'text-red-600');
+            saveStatus.textContent = 'Uploading products...';
+            saveStatus.classList.add('block');
+
+            const formData = new FormData();
+            const productsData = [];
+
+            pendingFiles.forEach(item => {
+                const card = document.querySelector(`.preview-card[data-id="${item.id}"]`);
+                formData.append('images', item.file);
+                productsData.push({
+                    originalName: item.file.name,
+                    name: card.querySelector('.name-input').value,
+                    price: card.querySelector('.price-input').value,
+                    category: card.querySelector('.category-input').value
+                });
+            });
+
+            formData.append('productsData', JSON.stringify(productsData));
+
+            try {
+                const response = await fetch('/admin/bulk-upload-json', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    saveStatus.textContent = '✅ ' + result.message;
+                    saveStatus.classList.add('text-green-600');
+                    setTimeout(() => {
+                        window.location.href = '/admin?message=' + encodeURIComponent(result.message);
+                    }, 1500);
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                saveStatus.textContent = '❌ Error: ' + error.message;
+                saveStatus.classList.add('text-red-600');
+            }
+        });
+    </script>
+</body>
+</html>

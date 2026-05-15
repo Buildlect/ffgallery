@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - <%= SITE_NAME %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hover-lift { transition: all 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="/" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-home"></i>
+                </a>
+                <h1 class="text-lg font-bold text-gray-900">My Dashboard</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm font-medium text-gray-600 hidden md:inline">Hi, <%= user.full_name %></span>
+                <a href="/logout" class="text-xs font-bold text-red-500 uppercase tracking-wider hover:underline">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Welcome Card -->
+        <div class="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white mb-10 shadow-lg relative overflow-hidden">
+            <div class="relative z-10">
+                <h2 class="text-2xl font-bold mb-2">Hello, <%= user.full_name %>!</h2>
+                <p class="text-gray-400 text-sm">Welcome to your personalized fashion gallery.</p>
+            </div>
+            <div class="absolute right-0 bottom-0 opacity-10 transform translate-y-4 translate-x-4">
+                <i class="fas fa-user-circle text-9xl"></i>
+            </div>
+        </div>
+
+        <!-- Favorites Section -->
+        <div>
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-heart text-red-500"></i>
+                    Your Favorites
+                </h3>
+                <a href="/buy" class="text-sm font-bold text-[#F4C85B] hover:underline">Browse More</a>
+            </div>
+
+            <% if (favorites.length === 0) { %>
+            <div class="bg-white rounded-2xl p-12 text-center border border-dashed border-gray-200">
+                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+                    <i class="far fa-heart text-2xl"></i>
+                </div>
+                <h4 class="text-lg font-bold text-gray-900 mb-1">No favorites yet</h4>
+                <p class="text-gray-500 text-sm mb-6">Heart the items you love to save them here.</p>
+                <a href="/buy" class="bg-gray-900 text-white font-bold py-3 px-8 rounded-xl hover:bg-gray-800 transition-all">Start Browsing</a>
+            </div>
+            <% } else { %>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <% favorites.forEach(product => { %>
+                <div class="bg-white rounded-2xl shadow-sm overflow-hidden hover-lift border border-gray-100 relative group">
+                    <div class="aspect-[3/4] overflow-hidden">
+                        <img src="/<%= product.image_path %>" alt="<%= product.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    </div>
+                    <button data-id="<%= product.id %>" class="btn-toggle-favorite absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md text-red-500 hover:scale-110 transition-all">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                    <div class="p-4">
+                        <p class="text-xs font-bold text-[#F4C85B] uppercase mb-1"><%= product.category %></p>
+                        <h4 class="font-bold text-gray-900 mb-2 truncate"><%= product.name %></h4>
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-gray-900">₦<%= product.price.toLocaleString() %></span>
+                            <a href="/buy?search=<%= encodeURIComponent(product.name) %>" class="text-xs font-bold text-gray-400 hover:text-gray-600">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+            <% } %>
+        </div>
+    </main>
+
+    <script>
+        async function toggleFavorite(productId, btn) {
+            try {
+                const response = await fetch('/api/favorites/toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId })
+                });
+                const result = await response.json();
+                if (result.success && result.action === 'removed') {
+                    // Refresh if in dashboard to remove from view
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Event delegation for favorites
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-toggle-favorite');
+            if (btn) {
+                toggleFavorite(btn.dataset.id, btn);
+            }
+        });
+    </script>
+</body>
+</html>

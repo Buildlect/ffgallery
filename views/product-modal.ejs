@@ -1,0 +1,71 @@
+<div class="relative">
+  <button onclick="closeProductModal()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors btn-touch" aria-label="Close modal">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+  </button>
+  
+  <div class="grid md:grid-cols-2 gap-4 md:gap-6">
+    <div class="rounded-xl overflow-hidden">
+      <img src="/<%= product.image_path %>" 
+           alt="<%= product.name %>"
+           class="w-full h-48 md:h-64 object-cover"
+           onerror="this.src='https://via.placeholder.com/400x500/f3f4f6/9ca3af?text=Product+Image'">
+    </div>
+    
+    <div class="py-1">
+      <h2 class="text-lg md:text-xl font-bold mb-2 text-gray-900"><%= product.name %></h2>
+      <div class="flex items-center mb-3">
+        <span class="text-xl font-bold text-[#F4C85B]">₦<%= product.price.toLocaleString() %></span>
+        <% if (product.is_featured) { %>
+        <span class="ml-2 bg-[#F4C85B] text-black text-xs px-2 py-1 rounded-full">Featured</span>
+        <% } %>
+      </div>
+      
+      <p class="text-gray-600 mb-4 text-sm"><%= product.description %></p>
+      
+      <div class="space-y-2 mb-4 text-xs">
+        <% if (product.category) { %>
+        <div class="flex items-center">
+          <i class="fas fa-tag text-[#F4C85B] mr-2 w-4"></i>
+          <span class="text-gray-700"><strong>Category:</strong> <%= product.category %></span>
+        </div>
+        <% } %>
+        
+        <% if (product.size_range) { %>
+        <div class="flex items-center">
+          <i class="fas fa-ruler text-[#F4C85B] mr-2 w-4"></i>
+          <span class="text-gray-700"><strong>Sizes:</strong> <%= product.size_range %></span>
+        </div>
+        <% } %>
+        
+        <% if (product.colors_available) { %>
+        <div class="flex items-center">
+          <i class="fas fa-palette text-[#F4C85B] mr-2 w-4"></i>
+          <span class="text-gray-700"><strong>Colors:</strong> <%= product.colors_available %></span>
+        </div>
+        <% } %>
+        
+        <div class="flex items-center">
+          <i class="fas fa-box text-[#F4C85B] mr-2 w-4"></i>
+          <span class="text-gray-700">
+            <strong>Stock:</strong> 
+            <%= {
+                'in_stock': 'In Stock',
+                'low_stock': 'Low Stock', 
+                'out_of_stock': 'Out of Stock'
+            }[product.stock_status] %>
+          </span>
+        </div>
+      </div>
+      
+      <div class="flex flex-col gap-2">
+        <button onclick="openWhatsAppModal('<%= WHATSAPP_CHAT_URL %>?text=Hi! I\'m interested in <%= encodeURIComponent(product.name) %> (₦<%= product.price.toLocaleString() %>). Can you provide more details?', 'product')" 
+                class="bg-[#F4C85B] hover:bg-amber-500 text-black font-semibold py-3 rounded-lg transition-colors text-center flex items-center justify-center btn-touch text-sm">
+          <i class="fab fa-whatsapp mr-2"></i>
+          Inquire on WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

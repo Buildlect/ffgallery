@@ -4,10 +4,6 @@ const { pool } = require('../config/db');
 
 // Landing Page
 router.get('/', async (req, res) => {
-    if (!req.session.user) {
-        return res.render('landing');
-    }
-
     try {
         const [featuredProducts] = await pool.execute(
             "SELECT * FROM products WHERE is_featured = TRUE AND status = 'active' ORDER BY created_at DESC LIMIT 8"
@@ -27,10 +23,6 @@ router.get('/', async (req, res) => {
 
 // All Products Page
 router.get('/buy', async (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('/login?message=' + encodeURIComponent('Please login to view products'));
-    }
-
     try {
         const search = req.query.search || '';
         const categoryFilter = req.query.category || '';

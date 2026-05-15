@@ -32,7 +32,7 @@ async function initializeDatabase() {
         // 2. Check for missing tables
         const [tables] = await pool.query('SHOW TABLES');
         const tableNames = tables.map(t => Object.values(t)[0]);
-        const requiredTables = ['products', 'admin_users', 'users', 'favorites', 'orders', 'order_items'];
+        const requiredTables = ['products', 'admin_users', 'users', 'favorites'];
         const missingTables = requiredTables.filter(t => !tableNames.includes(t));
 
         if (missingTables.length > 0) {
